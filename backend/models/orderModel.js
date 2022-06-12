@@ -1,81 +1,55 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { Helmet } from 'react-helmet-async';
-import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
-import { useNavigate } from 'react-router-dom';
-import CheckOutBar from '../sections/CheckOutBar';
-import { Storage } from '../Storage';
+import mongoose from 'mongoose';
 
-export default function PaymentPage() {
-  //uses navigate hook to navigate data
-  const navigate = useNavigate();
+const orderModelSchema = new mongoose.Schema(
+  {
+    //Array that saves item information
+    orderItems: [
+      {
+        slug: { type: String, required: true },
+        name: { type: String, required: true },
+        total: { type: Number, required: true },
+        image: { type: String, required: true },
+        price: { type: Number, required: true },
+        merch: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Merch',
+          required: true,
+        },
+      },
+    ],
+    //Contains Customer Information
+    customerInformation: {
+      fName: { type: String, required: true },
+      address: { type: String, required: true },
+      city: { type: String, required: true },
+      pCode: { type: String, required: true },
+      country: { type: String, required: true },
+    },
 
-  const { state, dispatch: ctxDispatch } = useContext(Storage);
-  //uses state to get cart
-  const {
-    //from the cart it gets customer information and payment method
-    cart: { customerInformation, paymentMethod },
-  } = state;
-  //defines state for payment method name
-  const [paymentMethodName, setPaymentMethod] = useState(
-    paymentMethod || 'PayPal'
-  );
+    //Payment type selected
+    paymentMethod: { type: String, required: true },
+    paymentResult: {
+      id: String,
+      status: String,
+      update_time: String,
+      email_address: String,
+    },
 
-  useEffect(() => {
-    //Takes user back to previous state if address does not exist
-    if (!customerInformation.address) {
-      navigate('/shipping');
-    }
-  }, [customerInformation, navigate]);
+    itemsPrice: { type: Number, required: true },
+    shippingPrice: { type: Number, required: true },
+    taxPrice: { type: Number, required: true },
+    totalPrice: { type: Number, required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    isPaid: { type: Boolean, default: false },
+    paidAt: { type: Date },
+    isDelivered: { type: Boolean, default: false },
+    deliveredAt: { type: Date },
+  },
+  {
+    timestamps: true,
+  }
+);
+//Turns orderModelSchema into Order Model
+const Order = mongoose.model('Order', orderModelSchema);
 
-  //prevents refresh of page on submit
-  const submitHandler = (e) => {
-    e.preventDefault();
-    //dispatches save payment method
-    ctxDispatch({ type: 'SAVE_PAYMENT_METHOD', payload: paymentMethodName });
-    //Saves selected method in local storage
-    localStorage.setItem('paymentMethod', paymentMethodName);
-    //redirects user to next state
-    navigate('/placeorder');
-  };
-  return (
-    <div>
-      <CheckOutBar step1 step2 step3></CheckOutBar>
-      <div className="container small-container">
-        <Helmet>
-          <title>Payment Method</title>
-        </Helmet>
-        <h1 className="my-3"> Payment Method </h1>
-        {/*Sumbit handler for created form */}
-        <Form onSubmit={submitHandler}>
-          <div className="mb-3">
-            {/*Check boxed that is checked if payment method is PayPal */}
-            <Form.Check
-              type="radio"
-              id="PayPal"
-              label="PayPal"
-              value="PayPal"
-              checked={paymentMethodName === 'PayPal'}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            />
-          </div>
-          <div className="mb-3">
-            {/*Check boxed that is checked if payment method is Stripe */}
-            <Form.Check
-              type="radio"
-              id="Stripe"
-              label="Stripe"
-              value="Stripe"
-              checked={paymentMethodName === 'Stripe'}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            />
-          </div>
-          {/*Button used to input selected payment method */}
-          <div className="mb-3">
-            <Button type="submit">Continue</Button>
-          </div>
-        </Form>
-      </div>
-    </div>
-  );
-}
+export default Order;
