@@ -28,11 +28,6 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//This gets the api from set address
-app.get('/api/keys/paypal', (req, res) => {
-  //returns the client paypal Id if it does not exist it sends back to sb (sandbox)
-  res.send(process.env.PAYPAL_CLIENT_ID || 'sb');
-});
 //When user enters any of the bottom api it will reach to its respective router and display it
 app.use('/api/seed', seedRouter);
 app.use('/api/merchs', merchRouter);

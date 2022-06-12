@@ -63,32 +63,4 @@ orderRouter.get(
   })
 );
 
-orderRouter.put(
-  //responds to this api
-  '/:id/pay',
-  //isAuth is responible for filling request
-  isAuth,
-  //expressAsyncHandler used to catch all errors
-  expressAsyncHandler(async (req, res) => {
-    const order = await Order.findById(req.params.id);
-    //checks if order exists
-    if (order) {
-      order.isPaid = true;
-      order.paidAt = Date.now();
-      order.paymentResult = {
-        id: req.body.id,
-        status: req.body.status,
-        update_time: req.body.update_time,
-        email_address: req.body.email_address,
-      };
-      //saves the order
-      const updateOrder = await order.save();
-      //sends back order payed message
-      res.send({ message: 'Payment Successful', order: updateOrder });
-      //Displays error if order does not  exist
-    } else {
-      res.status(404).send({ message: 'Order Not Found' });
-    }
-  })
-);
 export default orderRouter;

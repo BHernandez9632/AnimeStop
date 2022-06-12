@@ -10,8 +10,6 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import Card from 'react-bootstrap/Card';
-import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
-import { toast } from 'react-toastify';
 
 //This functions accepts action and state
 function reducer(state, action) {
@@ -27,17 +25,6 @@ function reducer(state, action) {
     case 'FETCH_FAIL':
       return { ...state, loading: false, error: action.payload };
     //Request payments
-    case 'PAYMENT_REQUEST':
-      return { ...state, loadingPay: true };
-    //On succes sets loading page to false
-    case 'PAYMENT_SUCCESS':
-      return { ...state, loadingPay: false, successPay: true };
-    //If the payment fails it sets page to false
-    case 'PAYMENT_FAIL':
-      return { ...state, loadingPay: false };
-    //Resets payment to default state
-    case 'PAYMENT_RESET':
-      return { ...state, loadingPay: false, successPay: false };
     default:
       return state;
   }
@@ -55,70 +42,12 @@ export default function OrderInfoPage() {
   const navigate = useNavigate();
 
   //Defines loading, error, order,successpay, loadingpay
-  const [{ loading, error, order, successPay, loadingPay }, dispatch] =
-    useReducer(reducer, {
-      //reducer defined
-      loading: true,
-      order: {},
-      error: '',
-      successPay: false,
-      loadingPay: false,
-    });
-  //The paypal reducer hook returns the state of loading and the function to load the script
-  const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
-
-  //createOrder function
-  function createOrder(data, action) {
-    return (
-      action.order
-        //calls create action
-        .create({
-          purchase_units: [
-            {
-              //passes the amount based on the total price
-              amount: { value: order.totalPrice },
-            },
-          ],
-        })
-        //if its successfull in creating order it returns the order from paypal
-        .then((orderID) => {
-          return orderID;
-        })
-    );
-  }
-
-  //approve function it triggers on successful payment
-  function onApprove(data, action) {
-    return action.order.capture().then(async function (details) {
-      //Updates order in the backend
-      try {
-        //Dispatches pay request
-        dispatch({ type: 'PAYMENT_REQUEST' });
-        //calls on this api with ajax request
-        const { data } = await axios.put(
-          `/api/orders/${order._id}/pay`,
-          //used to pass user information/payment information
-          details,
-          {
-            //Used to authorize the entire action
-            headers: { authorization: `Barrier${userInfo.token}` },
-          }
-        );
-        //once the payment is successful it dispatches this action
-        dispatch({ type: 'PAYMENT_SUCCESS', payload: data });
-        //Shows payment accepted
-        toast.success('Payment Accepted');
-        //shows error if there is problem updating backend
-      } catch (err) {
-        dispatch({ type: 'PAYMENT_FAIL', payload: getError(err) });
-        toast.error(getError(err));
-      }
-    });
-  }
-  //shows error message to user on error
-  function onError(err) {
-    toast.error(getError(err));
-  }
+  const [{ loading, error, order }, dispatch] = useReducer(reducer, {
+    //reducer defined
+    loading: true,
+    order: {},
+    error: '',
+  });
 
   useEffect(() => {
     //sends ajax request to backend
@@ -144,39 +73,12 @@ export default function OrderInfoPage() {
       return navigate('/login');
     }
     //This if condition is true it will fetch order if its not it
-    if (!order._id || successPay || (order._id && order._id !== orderId)) {
+    if (!order._id || (order._id && order._id !== orderId)) {
       //if its not it fetches the order
       fetchOrder();
-      if (successPay) {
-        //If payment  is true it resets status
-        dispatch({ type: 'PAYMENT_RESET' });
-      }
-    } else {
-      //this loads the paypal script
-      const loadPaypalScript = async () => {
-        //sends an ajax request to the backend to retrieve paypal client id
-        const { data: clientId } = await axios.get('/api/keys/paypal', {
-          //Authroizes the request
-          headers: { authorization: `Barrier ${userInfo.token}` },
-        });
-        //dispatches script action
-        paypalDispatch({
-          type: 'resetOptions',
-          //sets client Id from the backend
-
-          value: {
-            'client-id': clientId,
-            //sets currency to USD
-            currency: 'USD',
-          },
-        });
-        //This action sets loading status to pending
-        paypalDispatch({ type: 'setLoadingStatus', value: 'pending' });
-      };
-      loadPaypalScript();
     }
     //dependency array
-  }, [order, userInfo, orderId, navigate, paypalDispatch, successPay]);
+  }, [order, userInfo, orderId, navigate]);
 
   return loading ? (
     <LoadingBox></LoadingBox>
@@ -296,29 +198,6 @@ export default function OrderInfoPage() {
                     <Col>${order.totalPrice.toFixed(2)}</Col>
                   </Row>
                 </ListGroup.Item>
-                {/*This performs conditional rendering checking if order is not paid  */}
-                {!order.isPaid && (
-                  <ListGroup.Item>
-                    {/*Checks if is pending if true it shows loading box  */}
-                    {isPending ? (
-                      <LoadingBox />
-                    ) : (
-                      <div>
-                        {/*If not it shows this paypal button */}
-                        <PayPalButtons
-                          //This runs on click of paypal button
-                          createOrder={createOrder}
-                          //runs if successfully pays
-                          onApprove={onApprove}
-                          //displays if there is error in paying order
-                          onError={onError}
-                        ></PayPalButtons>
-                      </div>
-                    )}
-                    {/*If the pay is true it shows loading box */}
-                    {loadingPay && <LoadingBox></LoadingBox>}
-                  </ListGroup.Item>
-                )}
               </ListGroup>
             </Card.Body>
           </Card>
