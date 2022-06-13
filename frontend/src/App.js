@@ -69,6 +69,10 @@ function App() {
                       <LinkContainer to="/profile">
                         <NavDropdown.Item>User Account</NavDropdown.Item>
                       </LinkContainer>
+                      <LinkContainer to="/orderhistory">
+                        <NavDropdown.Item>Order History</NavDropdown.Item>
+                      </LinkContainer>
+                      <NavDropdown.Divider />
                       <NavDropdown.Divider />
                       {/*Used to show loggout if dropped down clicked */}
                       <Link
