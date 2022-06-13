@@ -49,9 +49,9 @@ function HomePage() {
     <div>
       {/*Helmet tag used to demonstrate selected title on tab */}
       <Helmet>
-        <title>AnimeMerch</title>
+        <title>AnimeStop</title>
       </Helmet>
-      <h1>Anime Merch</h1>
+      <h1>Anime Stop</h1>
       <div className="merchs">
         {/* used to show conditional rendering */}
         {loading ? (

@@ -32,7 +32,6 @@ function App() {
     localStorage.removeItem('userInfo');
     localStorage.removeItem('customerInformation');
     localStorage.removeItem('paymentMethod');
-    window.location.href = '/signin';
   };
   return (
     // Browser Router is used to create area for routing to create paths
@@ -47,7 +46,7 @@ function App() {
             <Container>
               {/* Linkcontainer is similar to a href used to redirect user to homescreen*/}
               <LinkContainer to="/">
-                <Navbar.Brand>Anime Merch</Navbar.Brand>
+                <Navbar.Brand>Anime Stop</Navbar.Brand>
               </LinkContainer>
               <Nav className="me-auto">
                 <Link to="/cart" className="nav-link">
@@ -66,9 +65,6 @@ function App() {
                     {/*On drop downn it will display profile information and history information */}
                     <LinkContainer to="/profile">
                       <NavDropdown.Item>User Account</NavDropdown.Item>
-                    </LinkContainer>
-                    <LinkContainer to="/orderhistory">
-                      <NavDropdown.Item> Check History </NavDropdown.Item>
                     </LinkContainer>
                     <NavDropdown.Divider />
                     {/*Used to show loggout if dropped down clicked */}
