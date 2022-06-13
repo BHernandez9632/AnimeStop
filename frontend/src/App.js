@@ -19,6 +19,7 @@ import SignUpPage from './pages/SignUpPage';
 import OrderPage from './pages/OrderPage';
 import OrderInfoPage from './pages/OrderInfoPage';
 import UserAccountPage from './pages/UserAccountPage';
+import OrderHistoryPage from './pages/OrderHistoryPage';
 
 function App() {
   const { state, dispatch: ctxDispatch } = useContext(Storage);
@@ -41,48 +42,51 @@ function App() {
         <ToastContainer position="top-center" limit={1} />
         <header>
           {/* Navbar is a component from bootstrap to create a navigation bar in the header*/}
-          <Navbar bg="primary" varian="primary">
+          <Navbar bg="primary" varian="primary" expand="lg">
             {/* Container is used to put items in a row */}
             <Container>
               {/* Linkcontainer is similar to a href used to redirect user to homescreen*/}
               <LinkContainer to="/">
                 <Navbar.Brand>Anime Stop</Navbar.Brand>
               </LinkContainer>
-              <Nav className="me-auto">
-                <Link to="/cart" className="nav-link">
-                  Cart
-                  {cart.cartItems.length > 0 && (
-                    <Badge pill bg="danger">
-                      {/* Sums up total of current items */}
-                      {cart.cartItems.reduce((a, b) => a + b.total, 0)}
-                    </Badge>
-                  )}
-                </Link>
-                {/*This checks to see if user info exists or if it doesn't */}
-                {userInfo ? (
-                  //This section is used to display user name
-                  <NavDropdown title={userInfo.name} id="basic-nav-dropdown">
-                    {/*On drop downn it will display profile information and history information */}
-                    <LinkContainer to="/profile">
-                      <NavDropdown.Item>User Account</NavDropdown.Item>
-                    </LinkContainer>
-                    <NavDropdown.Divider />
-                    {/*Used to show loggout if dropped down clicked */}
-                    <Link
-                      className="dropdown-item"
-                      to="#logout"
-                      onClick={logoutHandler}
-                    >
-                      Log Out
-                    </Link>
-                  </NavDropdown>
-                ) : (
-                  //if user does not exist it redirectrs to login page
-                  <Link className="nav-link" to="/signin">
-                    Log In
+              <Navbar.Toggle aria-controls="basic-navbar-nav" />
+              <Navbar.Collapse id="basic-navbar-nav">
+                <Nav className="me-auto w-100 justify-content-end">
+                  <Link to="/cart" className="nav-link">
+                    Cart
+                    {cart.cartItems.length > 0 && (
+                      <Badge pill bg="danger">
+                        {/* Sums up total of current items */}
+                        {cart.cartItems.reduce((a, b) => a + b.total, 0)}
+                      </Badge>
+                    )}
                   </Link>
-                )}
-              </Nav>
+                  {/*This checks to see if user info exists or if it doesn't */}
+                  {userInfo ? (
+                    //This section is used to display user name
+                    <NavDropdown title={userInfo.name} id="basic-nav-dropdown">
+                      {/*On drop downn it will display profile information and history information */}
+                      <LinkContainer to="/profile">
+                        <NavDropdown.Item>User Account</NavDropdown.Item>
+                      </LinkContainer>
+                      <NavDropdown.Divider />
+                      {/*Used to show loggout if dropped down clicked */}
+                      <Link
+                        className="dropdown-item"
+                        to="#logout"
+                        onClick={logoutHandler}
+                      >
+                        Log Out
+                      </Link>
+                    </NavDropdown>
+                  ) : (
+                    //if user does not exist it redirectrs to login page
+                    <Link className="nav-link" to="/signin">
+                      Log In
+                    </Link>
+                  )}
+                </Nav>
+              </Navbar.Collapse>
             </Container>
           </Navbar>
         </header>
@@ -98,6 +102,7 @@ function App() {
               <Route path="/payment" element={<PaymentPage />} />
               <Route path="/placeorder" element={<OrderPage />} />
               <Route path="/order/:id" element={<OrderInfoPage />} />
+              <Route path="/orderhistory" element={<OrderHistoryPage />} />
               <Route path="/shipping" element={<CustomerInfoPage />} />
               <Route path="/" element={<HomePage />} />
             </Routes>
